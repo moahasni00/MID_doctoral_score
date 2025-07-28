@@ -140,9 +140,14 @@ elif score_total >= 50:
 else:
     st.markdown("❌ Vous êtes **en dessous du seuil recommandé** pour la sélection.")
 
-# --- Footer ---
+# --- Footer centered with contact ---
 st.markdown("---")
-st.caption(
-    "© Mohammed Amine Hasni – Basé sur les critères officiels du "
-    "Pôle d'Études Doctorales de l’Université Hassan I."
-)
+footer_html = """
+<div style="text-align:center; font-size:0.9em; margin-top:20px;">
+    © Mohammed Amine Hasni – Basé sur les critères officiels du Pôle d'Études Doctorales de l’Université Hassan I.<br>
+    <a href="http://linkedin.com/in/mohammed-amine-hasni" target="_blank">
+        Mon LinkedIn
+    </a>
+</div>
+"""
+st.markdown(footer_html, unsafe_allow_html=True)
