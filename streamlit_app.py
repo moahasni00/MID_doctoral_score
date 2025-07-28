@@ -1,47 +1,121 @@
 import streamlit as st
+from PIL import Image
 
-st.set_page_config(page_title="Doctoral Score Estimator", layout="centered")
+st.set_page_config(page_title="Doctoral Score Estimator", layout="wide")
 
-st.title("🎓 Doctoral Candidacy Score Estimator")
-st.write("Estimate your score out of 100 based on academic criteria.")
+# --- Header avec les logos ---
+col_left, col_center, col_right = st.columns([1, 6, 1])
+with col_left:
+    # Charge le logo FEG01.png à la racine du repo
+    logo_feg1 = Image.open("FEG01.png")
+    st.image(logo_feg1, width=100)
 
-# --- Bac Mention ---
+with col_center:
+    st.markdown(
+        "<h1 style='text-align: center;'>🎓 Pôle d'Études Doctorales</h1>",
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<p style='text-align: center;'>"
+        "Université Hassan I – "
+        "<a href='https://ced.uh1.ac.ma/' target='_blank'>https://ced.uh1.ac.ma</a>"
+        "</p>",
+        unsafe_allow_html=True
+    )
+
+with col_right:
+    # Charge le logo FEG.png à la racine du repo
+    logo_feg = Image.open("FEG.png")
+    st.image(logo_feg, width=100)
+
+st.markdown("---")
+
+# --- Expander: Critères de présélection ---
+with st.expander("📘 Critères de présélection – Cliquez pour voir les détails ou consultez la source officielle"):
+    st.markdown("""
+    ### 📋 Critères d’évaluation des candidatures au cycle doctoral
+    
+    Chaque dossier est noté sur **100 points**, répartis comme suit :
+    
+    #### 🎓 1. Baccalauréat (10 points)
+    - Passable → 2 points  
+    - Assez Bien → 6 points  
+    - Bien → 8 points  
+    - Très Bien → 10 points  
+
+    #### 🎓 2. Formation Universitaire (70 points)
+    - **Système LMD** :  
+      - Licence (/20) × 1.75  
+      - Master (/20) × 1.75  
+    - **Système NLMD** :  
+      - Moyenne générale × 3.5  
+    - ⚠️ Chaque **année redoublée** retire **5 points** du total universitaire.
+
+    #### 🧠 3. Spécialité (20 points)
+    - Loin de la spécialité → 0 point  
+    - Proche de la spécialité → 10 points  
+    - Exactement dans la spécialité → 20 points  
+    
+    🔗 [Critères de préselection officiels](https://ced.uh1.ac.ma/criteres-de-preselection/)
+    """)
+
+# --- Expander: Sujets de recherche ---
+with st.expander("📚 Sujets de recherche proposés"):
+    st.markdown("""
+    Les sujets de recherche proposés par les enseignants‑chercheurs 
+    de l’Université Hassan 1er sont disponibles en ligne ici :
+    [https://api-ced.uh1.ac.ma/sujets](https://api-ced.uh1.ac.ma/sujets)
+    """)
+
+# --- Inputs utilisateur ---
 st.subheader("1. Mention au Baccalauréat (sur 10)")
-mention_bac = st.selectbox("Sélectionnez votre mention :", [
-    "Passable", "Assez Bien", "Bien", "Très Bien"
-])
-
-mention_scores = {
-    "Passable": 2,
-    "Assez Bien": 6,
-    "Bien": 8,
-    "Très Bien": 10
-}
+mention_bac = st.selectbox(
+    "Sélectionnez votre mention :",
+    ["Passable", "Assez Bien", "Bien", "Très Bien"]
+)
+mention_scores = {"Passable": 2, "Assez Bien": 6, "Bien": 8, "Très Bien": 10}
 score_bac = mention_scores[mention_bac]
 
-# --- Système Universitaire ---
 st.subheader("2. Formation Universitaire (sur 70)")
-system_type = st.radio("Quel est votre système universitaire ?", ["LMD", "NLMD"])
+system_type = st.radio(
+    "Quel est votre système universitaire ?",
+    ["LMD", "NLMD"]
+)
 
 if system_type == "LMD":
-    licence_avg = st.number_input("Moyenne générale de la Licence (/20)", min_value=0.0, max_value=20.0, value=12.0)
-    master_avg = st.number_input("Moyenne générale du Master (/20)", min_value=0.0, max_value=20.0, value=14.0)
+    licence_avg = st.number_input(
+        "Moyenne Licence (/20)",
+        min_value=0.0, max_value=20.0, value=12.0
+    )
+    master_avg = st.number_input(
+        "Moyenne Master (/20)",
+        min_value=0.0, max_value=20.0, value=14.0
+    )
     score_univ = (licence_avg * 1.75) + (master_avg * 1.75)
 else:
-    global_avg = st.number_input("Moyenne générale de toutes les années (/20)", min_value=0.0, max_value=20.0, value=13.0)
+    global_avg = st.number_input(
+        "Moyenne générale globale (/20)",
+        min_value=0.0, max_value=20.0, value=13.0
+    )
     score_univ = global_avg * 3.5
 
-# --- Redoublement ---
-repeated_years = st.number_input("Nombre d’années redoublées", min_value=0, max_value=5, step=1)
+repeated_years = st.number_input(
+    "Nombre d’années redoublées",
+    min_value=0, max_value=5, step=1
+)
 penalty = repeated_years * 5
 score_univ -= penalty
-score_univ = max(0, round(score_univ, 2))  # Prevent negatives
+score_univ = max(0, round(score_univ, 2))
 
-# --- Spécialité ---
 st.subheader("3. Spécialité du sujet de thèse (sur 20)")
-speciality = st.selectbox("Votre formation est-elle liée au sujet ?", [
-    "Loin de la spécialité", "Proche de la spécialité", "Dans la spécialité (ex: Économie, Statistique, Économétrie)"
-])
+speciality = st.selectbox(
+    "Lien entre votre formation et le sujet de thèse :",
+    [
+        "Loin de la spécialité",
+        "Proche de la spécialité",
+        "Dans la spécialité (ex: Économie, Statistique, Économétrie)"
+    ]
+)
 speciality_scores = {
     "Loin de la spécialité": 0,
     "Proche de la spécialité": 10,
@@ -49,10 +123,9 @@ speciality_scores = {
 }
 score_speciality = speciality_scores[speciality]
 
-# --- Total ---
+# --- Score total ---
 score_total = round(score_bac + score_univ + score_speciality, 2)
 
-# --- Display Results ---
 st.markdown("---")
 st.subheader("🧮 Résultat Final")
 st.write(f"**Score Bac :** {score_bac} / 10")
@@ -67,6 +140,9 @@ elif score_total >= 50:
 else:
     st.markdown("❌ Vous êtes **en dessous du seuil recommandé** pour la sélection.")
 
-# Footer
+# --- Footer ---
 st.markdown("---")
-st.caption("© Mohammed Amine Hasni – Estimation basée sur les critères officiels de présélection doctorale.")
+st.caption(
+    "© Mohammed Amine Hasni – Basé sur les critères officiels du "
+    "Pôle d'Études Doctorales de l’Université Hassan I."
+)
